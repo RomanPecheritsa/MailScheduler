@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <h4 class="orange-text">Подтверждение удаления</h4>
+        <div class="card grey lighten-4">
+            <div class="card-content l6">
+                <p>Вы действительно хотите удалить клиента <strong>{{ object.full_name }}</strong> с email
+                    <strong>{{ object.email }}</strong>?</p>
+            </div>
+            <div class="card-action">
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn red">Удалить</button>
+                    <a href="{% url 'mailing:client_list' %}" class="btn blue">Отмена</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <br>
+{% endblock %}
