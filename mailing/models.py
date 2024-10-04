@@ -33,23 +33,24 @@ class Message(models.Model):
         ordering = ("title",)
 
 
-class Distribution(models.Model):
+class Mailing(models.Model):
     """Mailing list"""
 
     class Status(models.TextChoices):
         CREATED = "CR", "Создана"
         RUNNING = "RN", "Запущена"
-        COMPLETED = "CO", "Завершена"
 
     class Frequency(models.TextChoices):
         DAILY = "D", "Раз в день"
         WEEKLY = "W", "Раз в неделю"
         MONTHLY = "M", "Раз в месяц"
 
+    is_active = models.BooleanField(default=True, verbose_name='активность рассылки')
+
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name="дата и время создания рассылки"
     )
-    first_send_time = models.DateTimeField(
+    send_time = models.DateTimeField(
         verbose_name="дата и время первой отправки рассылки"
     )
     frequency = models.CharField(
@@ -71,7 +72,7 @@ class Distribution(models.Model):
         verbose_name="сообщения",
     )
     clients = models.ManyToManyField(
-        Client, related_name="distributions", verbose_name="клиенты"
+        Client, related_name="clients", verbose_name="клиенты"
     )
 
     def __str__(self):
@@ -83,31 +84,30 @@ class Distribution(models.Model):
         ordering = ("-created_at",)
 
 
-class DistributionAttempt(models.Model):
+class MailingAttempt(models.Model):
     """Represents an attempt to send a mailing"""
 
     class Status(models.TextChoices):
-        SUCCESS = "S", "Успешно"
-        FAILED = "F", "Неуспешно"
+        SUCCESS = "SC", "Успешно"
+        FAILED = "FL", "Неуспешно"
 
-    distribution = models.ForeignKey(
-        Distribution,
+    mailing = models.ForeignKey(
+        Mailing,
         on_delete=models.CASCADE,
         related_name="attempts",
         verbose_name="рассылка",
     )
     attempt_time = models.DateTimeField(
-        auto_now_add=True, verbose_name="дата и время послежней попытки"
+        auto_now_add=True, verbose_name="дата и время попытки отправки"
     )
     status = models.CharField(
-        max_length=1,
-        choices=Status.choices,
-        default=Status.FAILED,
-        verbose_name="статус",
+        max_length=2, choices=Status.choices, verbose_name="статус попытки"
     )
     server_response = models.TextField(
-        **NULLABLE, help_text="Ответ почтового сервера, если он был."
+        verbose_name="ответ почтового сервера", **NULLABLE
     )
 
-    def __str__(self):
-        return f"Попытка {self.id} для рассылки {self.distribution.id}: {self.get_status_display()} {self.server_response}"
+    class Meta:
+        verbose_name = "попытка рассылки"
+        verbose_name_plural = "попытки рассылок"
+        ordering = ["-attempt_time"]
