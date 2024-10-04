@@ -1,13 +1,14 @@
 <nav class="light-blue lighten-1" role="navigation">
     <div class="nav-wrapper container"><a id="logo-container" href="{% url 'mailing:home' %}" class="brand-logo"><i class="material-icons">email</i>Планировщик Рассылок</a>
         <ul class="right hide-on-med-and-down">
-            <li><a href="#">Отчет</a></li>
+            <li><a href="{% url 'mailing:mailing_attempt_list' %}">Отчет</a></li>
+        </ul>
+
+        <ul class="right hide-on-med-and-down">
+            <li><a href="{% url 'mailing:mailing_list' %}">Рассылки</a></li>
         </ul>
         <ul class="right hide-on-med-and-down">
-            <li><a href="#">Сообщения</a></li>
-        </ul>
-        <ul class="right hide-on-med-and-down">
-            <li><a href="#">Рассылки</a></li>
+            <li><a href="{% url 'mailing:message_list' %}">Сообщения</a></li>
         </ul>
         <ul class="right hide-on-med-and-down">
             <li><a href="{% url 'mailing:client_list' %}">Клиенты</a></li>

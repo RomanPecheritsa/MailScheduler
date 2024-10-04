@@ -1,28 +1,24 @@
 {% extends 'base.html' %}
 {% block content %}
     <div class="container">
-        <h4 class="header center orange-text text-darken-2">{{ title }}</h4>
+        <h4 class="header center orange-text">{{ title }}</h4>
         <br>
         <div class="row">
-            <form method="post" enctype="multipart/form-data" class="col s12 m8 offset-m2">
+            <form method="post" class="col s12 m6 offset-m3">
                 {% csrf_token %}
                 <div class="input-field">
-                    {{ form.full_name.label_tag }}
-                    {{ form.full_name }}
+                    {{ form.title.label_tag }}
+                    {{ form.title }}
                 </div>
                 <div class="input-field">
-                    {{ form.email.label_tag }}
-                    {{ form.email }}
-                </div>
-                <div class="input-field">
-                    {{ form.comment.label_tag }}
-                    {{ form.comment }}
+                    {{ form.body.label_tag }}
+                    {{ form.body }}
                 </div>
                 <div class="row center">
                     <button type="submit" class="btn waves-effect waves-light orange darken-2">
                         <i class="material-icons left">save</i> {{ button_text }}
                     </button>
-                    <a href="{% url 'mailing:client_list' %}" class="btn waves-effect waves-light blue darken-2">
+                    <a href="{% url 'mailing:message_list' %}" class="btn waves-effect waves-light blue darken-2">
                         <i class="material-icons left">arrow_back</i> Отменить
                     </a>
                 </div>
