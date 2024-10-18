@@ -15,6 +15,7 @@ from django.views.generic import (
 
 from mailing.forms import ClientForm, MessageForm, MailingForm
 from mailing.models import Client, Message, Mailing, MailingAttempt
+from mailing.mixins import AuthenticationLoginRequiredMixin as ALRM
 
 
 class HomePageView(TemplateView):
@@ -26,7 +27,7 @@ class HomePageView(TemplateView):
         return context
 
 
-class ClientListView(ListView):
+class ClientListView(ALRM, ListView):
     model = Client
     paginate_by = 6
     ordering = ("-id",)
@@ -37,11 +38,11 @@ class ClientListView(ListView):
         return context
 
 
-class ClientDetailView(DetailView):
+class ClientDetailView(ALRM, DetailView):
     model = Client
 
 
-class ClientCreateView(CreateView):
+class ClientCreateView(ALRM, CreateView):
     model = Client
     form_class = ClientForm
     success_url = reverse_lazy("mailing:client_list")
@@ -56,7 +57,7 @@ class ClientCreateView(CreateView):
         return reverse_lazy("mailing:client_detail", kwargs={"pk": self.object.pk})
 
 
-class ClientUpdateView(UpdateView):
+class ClientUpdateView(ALRM, UpdateView):
     model = Client
     form_class = ClientForm
 
@@ -70,12 +71,12 @@ class ClientUpdateView(UpdateView):
         return reverse_lazy("mailing:client_detail", kwargs={"pk": self.object.pk})
 
 
-class ClientDeleteView(DeleteView):
+class ClientDeleteView(ALRM, DeleteView):
     model = Client
     success_url = reverse_lazy("mailing:client_list")
 
 
-class MessageListView(ListView):
+class MessageListView(ALRM, ListView):
     model = Message
     paginate_by = 6
 
@@ -85,11 +86,11 @@ class MessageListView(ListView):
         return context
 
 
-class MessageDetailView(DetailView):
+class MessageDetailView(ALRM, DetailView):
     model = Message
 
 
-class MessageCreateView(CreateView):
+class MessageCreateView(ALRM, CreateView):
     model = Message
     form_class = MessageForm
 
@@ -103,7 +104,7 @@ class MessageCreateView(CreateView):
         return reverse_lazy("mailing:message_detail", kwargs={"pk": self.object.pk})
 
 
-class MessageUpdateView(UpdateView):
+class MessageUpdateView(ALRM, UpdateView):
     model = Message
     form_class = MessageForm
 
@@ -117,12 +118,12 @@ class MessageUpdateView(UpdateView):
         return reverse_lazy("mailing:message_detail", kwargs={"pk": self.object.pk})
 
 
-class MessageDeleteView(DeleteView):
+class MessageDeleteView(ALRM, DeleteView):
     model = Message
     success_url = reverse_lazy("mailing:message_list")
 
 
-class MailingListView(ListView):
+class MailingListView(ALRM, ListView):
     model = Mailing
     paginate_by = 3
 
@@ -132,7 +133,7 @@ class MailingListView(ListView):
         return context
 
 
-class MailingDetailView(DetailView):
+class MailingDetailView(ALRM, DetailView):
     model = Mailing
 
 
@@ -150,7 +151,7 @@ class MailingCreateView(CreateView):
         return reverse_lazy("mailing:mailing_detail", kwargs={"pk": self.object.pk})
 
 
-class MailingUpdateView(UpdateView):
+class MailingUpdateView(ALRM, UpdateView):
     model = Mailing
     form_class = MailingForm
 
@@ -164,12 +165,12 @@ class MailingUpdateView(UpdateView):
         return reverse_lazy("mailing:mailing_detail", kwargs={"pk": self.object.pk})
 
 
-class MailingDeleteView(DeleteView):
+class MailingDeleteView(ALRM, DeleteView):
     model = Mailing
     success_url = reverse_lazy("mailing:mailing_list")
 
 
-class MailingToggleActiveView(View):
+class MailingToggleActiveView(ALRM, View):
     def post(self, request, pk):
         mailing = get_object_or_404(Mailing, pk=pk)
         data = json.loads(request.body)
@@ -178,7 +179,7 @@ class MailingToggleActiveView(View):
         return JsonResponse({"success": True})
 
 
-class MailingAttemptListView(ListView):
+class MailingAttemptListView(ALRM, ListView):
     model = MailingAttempt
     context_object_name = "messageattempt_list"
     paginate_by = 10
