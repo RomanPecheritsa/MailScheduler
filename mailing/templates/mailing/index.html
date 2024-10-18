@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="section no-pad-bot" id="index-banner">
+        <div class="container">
+            <br><br>
+            <h1 class="header center orange-text">{{ title }}</h1>
+            <div class="row center">
+                <h5 class="header col s12 light">Современный инструмент для управления рассылками, основанный на Django и
+                    Material Design</h5>
+            </div>
+            <br><br>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col s12 m4">
+                <div class="icon-block">
+                    <h2 class="center light-blue-text"><i class="material-icons">schedule</i></h2>
+                    <h5 class="center">Автоматизация процессов</h5>
+                    <p class="light">С помощью нашего планировщика вы сможете автоматизировать процесс отправки
+                        рассылок, настроив их на отправку в удобное для вас время, что позволит сэкономить время и
+                        усилия.</p>
+                </div>
+            </div>
+
+            <div class="col s12 m4">
+                <div class="icon-block">
+                    <h2 class="center light-blue-text"><i class="material-icons">person_add</i></h2>
+                    <h5 class="center">Управление клиентами</h5>
+                    <p class="light">Легко добавляйте и управляйте списком ваших клиентов, включая возможность
+                        сегментации для более точного таргетинга ваших рассылок.</p>
+                </div>
+            </div>
+
+            <div class="col s12 m4">
+                <div class="icon-block">
+                    <h2 class="center light-blue-text"><i class="material-icons">analytics</i></h2>
+                    <h5 class="center">Анализ результатов</h5>
+                    <p class="light">Получайте отчеты о статусах рассылок, анализируйте их эффективность и адаптируйте
+                        свою стратегию в зависимости от полученных данных.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br><br>
+{% endblock %}

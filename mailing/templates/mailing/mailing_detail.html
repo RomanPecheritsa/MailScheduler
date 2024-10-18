@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <h4 class="header center orange-text text-darken-2">Информация о рассылке</h4>
+        <br>
+        <div class="card grey lighten-4 z-depth-2">
+            <div class="card-content">
+                <h5 class="blue-text text-darken-2">Дата и время создания рассылки:</h5>
+                <p class="grey-text text-darken-3">{{ object.created_at|date:"d.m.Y H:i" }}</p>
+
+                <h5 class="blue-text text-darken-2">Дата и время отправки рассылки:</h5>
+                <p class="grey-text text-darken-3">{{ object.send_time|date:"d.m.Y H:i" }}</p>
+
+                <h5 class="blue-text text-darken-2">Периодичность:</h5>
+                <p class="grey-text text-darken-3">{{ object.get_frequency_display }}</p>
+
+                <h5 class="blue-text text-darken-2">Сообщение для рассылки:</h5>
+                <p class="grey-text text-darken-3">
+                    <strong>{{ object.message.title }}</strong><br>
+                    {{ object.message.body|linebreaksbr }}
+                </p>
+
+                <h5 class="blue-text text-darken-2">Клиенты:</h5>
+                {% if object.clients.all %}
+                    <ul class="grey-text text-darken-3">
+                        {% for client in object.clients.all %}
+                            <li>{{ client.full_name }} ({{ client.email }})</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="grey-text text-darken-3">Нет выбранных клиентов для этой рассылки.</p>
+                {% endif %}
+            </div>
+            <div class="card-action">
+                <div class="row">
+                    <div class="col s8">
+                        <a href="{% url 'mailing:mailing_edit' object.pk %}"
+                           class="waves-effect waves-light btn-small orange darken-2">
+                            <i class="material-icons left">edit</i> Редактировать
+                        </a>
+                        <a href="{% url 'mailing:mailing_delete' object.pk %}"
+                           class="waves-effect waves-light btn-small red darken-2">
+                            <i class="material-icons left">delete</i> Удалить
+                        </a>
+                        <a href="{% url 'mailing:mailing_list' %}"
+                           class="waves-effect waves-light btn-small blue darken-2">
+                            <i class="material-icons left">list</i> К списку рассылок
+                        </a>
+                    </div>
+                    <div class="col s4 right-align">
+                        <button data-pk="{{ object.pk }}"
+                                class="btn-small waves-effect waves-light {% if object.is_active %}green darken-2{% else %}grey lighten-1{% endif %} toggle-active-btn">
+                            <i class="material-icons left">toggle_on</i>{% if object.is_active %}Активна{% else %}Неактивна{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const button = document.querySelector('.toggle-active-btn');
+            if (button) {
+                button.addEventListener('click', function () {
+                    const pk = this.getAttribute('data-pk');
+                    const isActive = this.classList.contains('green');
+                    fetch(`{% url 'mailing:mailing_toggle_active' 0 %}`.replace('0', pk), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({ 'is_active': !isActive })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            if (isActive) {
+                                this.classList.remove('green', 'darken-2');
+                                this.classList.add('grey', 'lighten-1');
+                                this.innerHTML = '<i class="material-icons left">toggle_on</i>Неактивна';
+                            } else {
+                                this.classList.remove('grey', 'lighten-1');
+                                this.classList.add('green', 'darken-2');
+                                this.innerHTML = '<i class="material-icons left">toggle_on</i>Активна';
+                            }
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+{% endblock %}

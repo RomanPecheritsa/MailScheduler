@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <h4 class="header center orange-text text-darken-2">Информация о клиенте</h4>
+        <br>
+        <div class="card grey lighten-4 z-depth-2">
+            <div class="card-content">
+                <h5 class="blue-text text-darken-2">ФИО:</h5>
+                <p class="grey-text text-darken-3">{{ object.full_name }}</p>
+
+                <h5 class="blue-text text-darken-2">Email:</h5>
+                <p class="grey-text text-darken-3">{{ object.email }}</p>
+
+                {% if object.comment %}
+                    <h5 class="blue-text text-darken-2">Комментарий:</h5>
+                    <p class="grey-text text-darken-3">{{ object.comment|linebreaksbr }}</p>
+                {% else %}
+                    <br>
+                {% endif %}
+
+            </div>
+            <div class="card-action">
+                <a href="{% url 'mailing:client_edit' object.pk %}"
+                   class="waves-effect waves-light btn-small orange darken-2">
+                    <i class="material-icons left">edit</i> Редактировать
+                </a>
+                <a href="{% url 'mailing:client_delete' object.pk %}"
+                   class="waves-effect waves-light btn-small red darken-2">
+                    <i class="material-icons left">delete</i> Удалить
+                </a>
+                <a href="{% url 'mailing:client_list' %}"
+                   class="waves-effect waves-light btn-small blue darken-2">
+                    <i class="material-icons left">list</i> К списку клиентов
+                </a>
+            </div>
+        </div>
+    </div>
+    <br>
+{% endblock %}

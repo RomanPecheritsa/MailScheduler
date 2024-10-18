@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="section no-pad-bot" id="index-banner">
+        <div class="container">
+            <h4 class="header center orange-text text-darken-2" style="font-weight: bold;">
+                {{ title }}
+            </h4>
+            <br>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            {% for object in object_list %}
+                <div class="col s12 m6">
+                    <div class="card z-depth-3 hoverable">
+                        <div class="card-content grey lighten-5">
+                            <span class="card-title blue-text text-darken-2" style="font-weight: 500;">
+                                {{ object.title }}
+                            </span>
+                            <p>{{ object.body|truncatewords:20 }}</p>
+                        </div>
+                        <div class="card-action">
+                            <a href="{% url 'mailing:message_detail' object.pk %}"
+                               class="btn-small waves-effect waves-light blue darken-2">
+                                <i class="material-icons left">info</i> Подробнее
+                            </a>
+                            <a href="{% url 'mailing:message_edit' object.pk %}"
+                               class="btn-small waves-effect waves-light orange darken-2">
+                                <i class="material-icons left">edit</i> Редактировать
+                            </a>
+                            <a href="{% url 'mailing:message_delete' object.pk %}"
+                               class="btn-small waves-effect waves-light red darken-2">
+                                <i class="material-icons left">delete</i> Удалить
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="row center">
+            <a class="btn-floating btn-large waves-effect waves-light orange"
+               href="{% url 'mailing:message_create' %}">
+                <i class="material-icons">add</i>
+            </a>
+        </div>
+        {% include 'mailing/includes/inc_pagination.html' %}
+    </div>
+{% endblock %}
