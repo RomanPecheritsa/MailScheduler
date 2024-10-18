@@ -19,7 +19,7 @@
                             </span>
                             <p>
                                 <strong>Дата и время создания:</strong> {{ mailing.created_at|date:"d.m.Y H:i" }}<br>
-                                <strong>Дата и время отправки:</strong> {{ mailing.send_time|date:"d.m.Y H:i" }}<br>
+                                <strong>Дата и время следующей отправки:</strong> {{ mailing.send_time|date:"d.m.Y H:i" }}<br>
                                 <strong>Периодичность:</strong> {{ mailing.get_frequency_display }}<br>
                                 <strong>Клиентов:</strong> {{ mailing.clients.count }}
                             </p>
