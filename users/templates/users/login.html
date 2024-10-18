@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <h4 class="header center orange-text text-darken-2">Авторизация</h4>
+        <br>
+        <div class="row">
+            <form method="post" class="col s12 m6 offset-m3" novalidate>
+                {% csrf_token %}
+                <div class="input-field">
+                    {{ form.username.label_tag }}
+                    {{ form.username }}
+                </div>
+                <div class="input-field">
+                    {{ form.password.label_tag }}
+                    {{ form.password }}
+                </div>
+                <div class="row center">
+                    <button type="submit" class="btn waves-effect waves-light orange darken-2">
+                        <i class="material-icons left">login</i> Войти
+                    </button>
+                    <a href="{% url 'users:register' %}" class="btn waves-effect waves-light blue darken-2">
+                        <i class="material-icons left">arrow_forward</i> Регистрация
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <br>
+{% endblock %}
