@@ -45,7 +45,7 @@ class Mailing(models.Model):
         WEEKLY = "W", "Раз в неделю"
         MONTHLY = "M", "Раз в месяц"
 
-    is_active = models.BooleanField(default=True, verbose_name='активность рассылки')
+    is_active = models.BooleanField(default=True, verbose_name="активность рассылки")
 
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name="дата и время создания рассылки"
