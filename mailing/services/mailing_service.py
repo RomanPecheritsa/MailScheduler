@@ -10,9 +10,7 @@ def check_and_send_mailings():
     current_time = timezone.now()
 
     mailings = Mailing.objects.filter(
-        status=Mailing.Status.CREATED,
-        send_time__lte=current_time,
-        is_active=True
+        status=Mailing.Status.CREATED, send_time__lte=current_time, is_active=True
     )
 
     for mailing in mailings:
