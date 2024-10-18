@@ -8,6 +8,7 @@ class MailingConfig(AppConfig):
     name = "mailing"
 
     def ready(self):
-        if 'runserver' in sys.argv and os.environ.get('RUN_MAIN') == 'true':
+        if "runserver" in sys.argv and os.environ.get("RUN_MAIN") == "true":
             from mailing.services.scheduler import start_scheduler
+
             start_scheduler()
