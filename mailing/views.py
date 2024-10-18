@@ -124,6 +124,7 @@ class MessageDeleteView(DeleteView):
 
 class MailingListView(ListView):
     model = Mailing
+    paginate_by = 3
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -172,20 +173,22 @@ class MailingToggleActiveView(View):
     def post(self, request, pk):
         mailing = get_object_or_404(Mailing, pk=pk)
         data = json.loads(request.body)
-        mailing.is_active = data['is_active']
+        mailing.is_active = data["is_active"]
         mailing.save()
-        return JsonResponse({'success': True})
+        return JsonResponse({"success": True})
 
 
 class MailingAttemptListView(ListView):
     model = MailingAttempt
-    context_object_name = 'messageattempt_list'
+    context_object_name = "messageattempt_list"
     paginate_by = 10
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Отчет рассылок'
+        context["title"] = "Отчет рассылок"
         return context
 
     def get_queryset(self):
-        return MailingAttempt.objects.select_related('mailing').order_by('-attempt_time')
+        return MailingAttempt.objects.select_related("mailing").order_by(
+            "-attempt_time"
+        )
