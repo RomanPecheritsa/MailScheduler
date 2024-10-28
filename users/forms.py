@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django import forms
 
+from mailing.mixins import StyleFormMixin
 from users.models import User
 
 
@@ -31,3 +32,9 @@ class UserCreateForm(UserCreationForm):
     class Meta:
         model = User
         fields = ["email", "password1", "password2"]
+
+
+class UserProfileForm(StyleFormMixin, forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name']

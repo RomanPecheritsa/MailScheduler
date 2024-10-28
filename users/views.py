@@ -8,13 +8,13 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.views import View
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
 
 from mailing.mixins import (
     AuthenticationLoginRequiredMixin as AuthLogin,
-    PermissionResponseMixin,
+    PermissionResponseMixin
 )
-from users.forms import UserAuthenticationForm, UserCreateForm
+from users.forms import UserAuthenticationForm, UserCreateForm, UserProfileForm
 from users.models import User
 from users.utils import send_email_confirm
 
@@ -52,6 +52,21 @@ class UserCreateView(CreateView):
         return super().form_valid(form)
 
 
+class UserDetailView(AuthLogin, DetailView):
+    model = User
+    context_object_name = 'user'
+    template_name = 'users/user_profile.html'
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Информация о пользователе'
+        context['button_text'] = 'Изменить информацию'
+        return context
+
+
 class UserListView(AuthLogin, PermissionResponseMixin, ListView):
     model = User
     paginate_by = 6
@@ -65,6 +80,29 @@ class UserListView(AuthLogin, PermissionResponseMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Пользователи платформы"
         return context
+
+
+class UserUpdateView(AuthLogin, UpdateView):
+    model = User
+    form_class = UserProfileForm
+    template_name = 'users/user_profile_edit.html'
+    context_object_name = 'user'
+
+    def get_success_url(self):
+        return reverse_lazy('users:profile', kwargs={'pk': self.object.pk})
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+
+class UserDeleteView(AuthLogin, DeleteView):
+    model = User
+    template_name = 'users/user_confirm_delete.html'
+    context_object_name = 'user'
+    success_url = reverse_lazy('users:login')
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(User, pk=self.request.user.pk)
 
 
 def email_verification(request, token):
@@ -87,3 +125,6 @@ class UserToggleActiveView(AuthLogin, PermissionResponseMixin, View):
         user.is_active = data["is_active"]
         user.save()
         return JsonResponse({"success": True})
+
+
+

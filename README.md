@@ -52,10 +52,10 @@ Enter the command in the terminal:
 python3 manage.py create_superuser
 ```
 
-### 6. Load Fixture (Blog Articles)
+### 6. Load Fixture
 Loading test fixtures for the database:
 ```bash
-python3 manage.py loaddata articles.json
+python3 manage.py loaddata data.json
 ```
 
 ### 7. Create Group
@@ -83,7 +83,11 @@ The server will be available at http://127.0.0.1:8000
 1. Пункт 5 (Create Superuser) создаст суперпользователя
     * email: admin@test.com
     * password: 12345678
-2. Пункт 6 (Load Fixture) выполнит загрузку 5 статей для Блога
+2. Пункт 6 (Load Fixture) выполнит загрузку в БД:
+   * 5 статей для блога
+   * 3 клиентов (владелец superuser)
+   * 3 сообщений для рассылки (владелец superuser)
+   * 3 рассылки (владелец superuser)
 3. Пункт 7 (Create Group) создаст:
    * regular_user - новые зарегестрированные пользователи платформы, имеют доступ только к своим созданным клиентам, сообщениям, рассылкам
    * manager - пользователи имеют только ограниченный доступ к странице рассылки (просмотр списка, детальный просмотр, деактивация), пользователей (просмотр списка, деактивация)
