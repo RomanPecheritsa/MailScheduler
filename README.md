@@ -23,7 +23,7 @@ This project aims to develop a mailing management service that allows users to c
 ### 1. Clone the Repository
 
 ```bash
-git git@github.com:RomanPecheritsa/MailScheduler.git
+git clone git@github.com:RomanPecheritsa/MailScheduler.git
 cd MailScheduler
 ```
 ### 2. Copy the env.example file to .env:
