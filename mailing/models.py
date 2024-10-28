@@ -1,5 +1,4 @@
 from django.db import models
-from mailing.utils import upload_to, NULLABLE
 from users.models import User
 
 BLANK_NULL_TRUE = {"blank": True, "null": True}
@@ -10,7 +9,7 @@ class Client(models.Model):
 
     email = models.EmailField(verbose_name="почта")
     full_name = models.CharField(max_length=150, verbose_name="ФИО")
-    comment = models.TextField(**NULLABLE, verbose_name="комментарий")
+    comment = models.TextField(**BLANK_NULL_TRUE, verbose_name="комментарий")
     owner = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -126,7 +125,7 @@ class MailingAttempt(models.Model):
         max_length=2, choices=Status.choices, verbose_name="статус попытки"
     )
     server_response = models.TextField(
-        verbose_name="ответ почтового сервера", **NULLABLE
+        verbose_name="ответ почтового сервера", **BLANK_NULL_TRUE
     )
 
     class Meta:
