@@ -6,13 +6,16 @@ from users.views import (
     UserCreateView,
     email_verification,
     UserListView,
-    UserToggleActiveView,
+    UserToggleActiveView, UserDetailView, UserUpdateView, UserDeleteView,
 )
 
 app_name = "users"
 
 urlpatterns = [
     path("", UserListView.as_view(), name="users_list"),
+    path("profile/<int:pk>/", UserDetailView.as_view(), name='profile'),
+    path("profile/edit/<int:pk>/", UserUpdateView.as_view(), name='profile_edit'),
+    path('profile/delete/', UserDeleteView.as_view(), name='profile_delete'),
     path(
         "login/", UserLoginView.as_view(template_name="users/login.html"), name="login"
     ),
