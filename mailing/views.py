@@ -1,7 +1,10 @@
 import json
 
+from django.contrib import messages
+from django.core.cache import cache
+from django.db.models import ProtectedError
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
     ListView,
@@ -13,9 +16,13 @@ from django.views.generic import (
     View,
 )
 
+from blog.models import Article
 from mailing.forms import ClientForm, MessageForm, MailingForm
 from mailing.models import Client, Message, Mailing, MailingAttempt
-from mailing.mixins import AuthenticationLoginRequiredMixin as ALRM
+from mailing.mixins import (
+    AuthenticationLoginRequiredMixin as AuthLogin,
+    PermissionResponseMixin,
+)
 
 
 class HomePageView(TemplateView):
@@ -24,13 +31,40 @@ class HomePageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Планировщик Рассылок"
+
+        total_mailings = cache.get("total_mailings")
+        if total_mailings is None:
+            total_mailings = Mailing.objects.count()
+            cache.set("total_mailings", total_mailings, 60 * 5)
+        context["total_mailings"] = total_mailings
+
+        active_mailings = cache.get("active_mailings")
+        if active_mailings is None:
+            active_mailings = Mailing.objects.filter(is_active=True).count()
+            cache.set("active_mailings", active_mailings, 60 * 5)
+        context["active_mailings"] = active_mailings
+
+        unique_clients = cache.get("unique_clients")
+        if unique_clients is None:
+            unique_clients = Client.objects.distinct().count()
+            cache.set("unique_clients", unique_clients, 60 * 5)
+        context["unique_clients"] = unique_clients
+
+        context["random_articles"] = Article.objects.order_by("?")[:3]
         return context
 
 
-class ClientListView(ALRM, ListView):
+class ClientListView(AuthLogin, PermissionResponseMixin, ListView):
     model = Client
     paginate_by = 6
     ordering = ("-id",)
+    permission_required = "mailing.view_client"
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Client.objects.all()
+        return Client.objects.filter(owner=user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -38,13 +72,15 @@ class ClientListView(ALRM, ListView):
         return context
 
 
-class ClientDetailView(ALRM, DetailView):
+class ClientDetailView(AuthLogin, PermissionResponseMixin, DetailView):
     model = Client
+    permission_required = "mailing.view_client"
 
 
-class ClientCreateView(ALRM, CreateView):
+class ClientCreateView(AuthLogin, PermissionResponseMixin, CreateView):
     model = Client
     form_class = ClientForm
+    permission_required = "mailing.add_client"
     success_url = reverse_lazy("mailing:client_list")
 
     def get_context_data(self, **kwargs):
@@ -53,13 +89,18 @@ class ClientCreateView(ALRM, CreateView):
         context["button_text"] = "Добавить"
         return context
 
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
     def get_success_url(self):
         return reverse_lazy("mailing:client_detail", kwargs={"pk": self.object.pk})
 
 
-class ClientUpdateView(ALRM, UpdateView):
+class ClientUpdateView(AuthLogin, PermissionResponseMixin, UpdateView):
     model = Client
     form_class = ClientForm
+    permission_required = "mailing.change_client"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -71,14 +112,22 @@ class ClientUpdateView(ALRM, UpdateView):
         return reverse_lazy("mailing:client_detail", kwargs={"pk": self.object.pk})
 
 
-class ClientDeleteView(ALRM, DeleteView):
+class ClientDeleteView(AuthLogin, PermissionResponseMixin, DeleteView):
     model = Client
     success_url = reverse_lazy("mailing:client_list")
+    permission_required = "mailing.delete_client"
 
 
-class MessageListView(ALRM, ListView):
+class MessageListView(AuthLogin, PermissionResponseMixin, ListView):
     model = Message
     paginate_by = 6
+    permission_required = "mailing.view_message"
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Message.objects.all()
+        return Message.objects.filter(owner=user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -86,13 +135,15 @@ class MessageListView(ALRM, ListView):
         return context
 
 
-class MessageDetailView(ALRM, DetailView):
+class MessageDetailView(AuthLogin, PermissionResponseMixin, DetailView):
     model = Message
+    permission_required = "mailing.view_message"
 
 
-class MessageCreateView(ALRM, CreateView):
+class MessageCreateView(AuthLogin, PermissionResponseMixin, CreateView):
     model = Message
     form_class = MessageForm
+    permission_required = "mailing.add_message"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -100,13 +151,18 @@ class MessageCreateView(ALRM, CreateView):
         context["button_text"] = "Добавить"
         return context
 
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
     def get_success_url(self):
         return reverse_lazy("mailing:message_detail", kwargs={"pk": self.object.pk})
 
 
-class MessageUpdateView(ALRM, UpdateView):
+class MessageUpdateView(AuthLogin, PermissionResponseMixin, UpdateView):
     model = Message
     form_class = MessageForm
+    permission_required = "mailing.change_message"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -118,14 +174,32 @@ class MessageUpdateView(ALRM, UpdateView):
         return reverse_lazy("mailing:message_detail", kwargs={"pk": self.object.pk})
 
 
-class MessageDeleteView(ALRM, DeleteView):
+class MessageDeleteView(AuthLogin, PermissionResponseMixin, DeleteView):
     model = Message
     success_url = reverse_lazy("mailing:message_list")
+    permission_required = "mailing.delete_message"
+
+    def post(self, request, *args, **kwargs):
+        try:
+            return super().post(request, *args, **kwargs)
+        except ProtectedError:
+            messages.error(
+                request,
+                "Невозможно удалить это сообщение, так как оно используется в одной или нескольких рассылках",
+            )
+            return redirect("mailing:message_list")
 
 
-class MailingListView(ALRM, ListView):
+class MailingListView(AuthLogin, PermissionResponseMixin, ListView):
     model = Mailing
     paginate_by = 3
+    permission_required = "mailing.view_mailing"
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser or user.groups.filter(name="manager").exists():
+            return Mailing.objects.all()
+        return Mailing.objects.filter(owner=user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -133,13 +207,21 @@ class MailingListView(ALRM, ListView):
         return context
 
 
-class MailingDetailView(ALRM, DetailView):
+class MailingDetailView(AuthLogin, PermissionResponseMixin, DetailView):
     model = Mailing
+    permission_required = "mailing.view_mailing"
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser or user.groups.filter(name="manager").exists():
+            return Mailing.objects.all()
+        return Mailing.objects.filter(owner=user)
 
 
-class MailingCreateView(CreateView):
+class MailingCreateView(AuthLogin, PermissionResponseMixin, CreateView):
     model = Mailing
     form_class = MailingForm
+    permission_required = "mailing.add_message"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -147,13 +229,23 @@ class MailingCreateView(CreateView):
         context["button_text"] = "Добавить"
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
     def get_success_url(self):
         return reverse_lazy("mailing:mailing_detail", kwargs={"pk": self.object.pk})
 
 
-class MailingUpdateView(ALRM, UpdateView):
+class MailingUpdateView(AuthLogin, PermissionResponseMixin, UpdateView):
     model = Mailing
     form_class = MailingForm
+    permission_required = "mailing.change_message"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -161,16 +253,24 @@ class MailingUpdateView(ALRM, UpdateView):
         context["button_text"] = "Сохранить изменения"
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
     def get_success_url(self):
         return reverse_lazy("mailing:mailing_detail", kwargs={"pk": self.object.pk})
 
 
-class MailingDeleteView(ALRM, DeleteView):
+class MailingDeleteView(AuthLogin, PermissionResponseMixin, DeleteView):
     model = Mailing
     success_url = reverse_lazy("mailing:mailing_list")
+    permission_required = "mailing.delete_message"
 
 
-class MailingToggleActiveView(ALRM, View):
+class MailingToggleActiveView(AuthLogin, PermissionResponseMixin, View):
+    permission_required = "mailing.disable_mailing"
+
     def post(self, request, pk):
         mailing = get_object_or_404(Mailing, pk=pk)
         data = json.loads(request.body)
@@ -179,17 +279,13 @@ class MailingToggleActiveView(ALRM, View):
         return JsonResponse({"success": True})
 
 
-class MailingAttemptListView(ALRM, ListView):
+class MailingAttemptListView(AuthLogin, ListView):
     model = MailingAttempt
-    context_object_name = "messageattempt_list"
+    context_object_name = "mailingattempt_list"
     paginate_by = 10
+    ordering = ("-attempt_time",)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = "Отчет рассылок"
         return context
-
-    def get_queryset(self):
-        return MailingAttempt.objects.select_related("mailing").order_by(
-            "-attempt_time"
-        )

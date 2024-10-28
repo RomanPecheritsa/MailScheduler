@@ -1,10 +1,13 @@
+import smtplib
+
+from django.core.mail import send_mail
 from django.core.management import BaseCommand
-from mailing.services.mailing_service import send_mailing
-from mailing.models import Mailing
+from mailing.models import Mailing, MailingAttempt
+from mailscheduler import settings
 
 
 class Command(BaseCommand):
-    help = "Send an immediate mailing."
+    help = "Send an immediate mailing"
 
     def handle(self, *args, **options):
         while True:
@@ -34,7 +37,7 @@ class Command(BaseCommand):
                 mailing_id = int(user_input)
                 if Mailing.objects.filter(pk=mailing_id).exists():
                     mailing = Mailing.objects.get(pk=mailing_id)
-                    send_mailing(mailing)
+                    single_mailing(mailing)
                     print(f"Рассылка {mailing.id} запущена.")
                     break
                 else:
@@ -43,3 +46,36 @@ class Command(BaseCommand):
                 print(
                     "Пожалуйста, введите правильный номер рассылки или 'q' для выхода."
                 )
+
+
+def single_mailing(mailing):
+    clients = mailing.clients.all()
+    emails = [client.email for client in clients]
+
+    attempt_status = MailingAttempt.Status.SUCCESS
+    server_response = None
+
+    try:
+        mailing.status = Mailing.Status.RUNNING
+        mailing.save()
+
+        send_mail(
+            subject=mailing.message.title,
+            message=mailing.message.body,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=emails,
+            fail_silently=False,
+        )
+
+        mailing.status = Mailing.Status.CREATED
+
+    except smtplib.SMTPException as error:
+        mailing.is_active = False
+        mailing.save()
+        attempt_status = MailingAttempt.Status.FAILED
+        server_response = str(error)
+
+    finally:
+        MailingAttempt.objects.create(
+            mailing=mailing, status=attempt_status, server_response=server_response
+        )

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load perm_tag %}
 {% block content %}
     <div class="section no-pad-bot" id="index-banner">
         <div class="container">
@@ -19,7 +20,8 @@
                             </span>
                             <p>
                                 <strong>Дата и время создания:</strong> {{ mailing.created_at|date:"d.m.Y H:i" }}<br>
-                                <strong>Дата и время следующей отправки:</strong> {{ mailing.send_time|date:"d.m.Y H:i" }}<br>
+                                <strong>Дата и время следующей
+                                    отправки:</strong> {{ mailing.send_time|date:"d.m.Y H:i" }}<br>
                                 <strong>Периодичность:</strong> {{ mailing.get_frequency_display }}<br>
                                 <strong>Клиентов:</strong> {{ mailing.clients.count }}
                             </p>
@@ -31,19 +33,22 @@
                                        class="btn-small waves-effect waves-light blue darken-2">
                                         <i class="material-icons left">info</i>Подробнее
                                     </a>
-                                    <a href="{% url 'mailing:mailing_edit' mailing.pk %}"
-                                       class="btn-small waves-effect waves-light orange darken-2">
-                                        <i class="material-icons left">edit</i>Редактировать
-                                    </a>
-                                    <a href="{% url 'mailing:mailing_delete' mailing.pk %}"
-                                       class="btn-small waves-effect waves-light red darken-2">
-                                        <i class="material-icons left">delete</i>Удалить
-                                    </a>
+                                    {% if user|regular_user_only %}
+                                        <a href="{% url 'mailing:mailing_edit' mailing.pk %}"
+                                           class="btn-small waves-effect waves-light orange darken-2">
+                                            <i class="material-icons left">edit</i>Редактировать
+                                        </a>
+                                        <a href="{% url 'mailing:mailing_delete' mailing.pk %}"
+                                           class="btn-small waves-effect waves-light red darken-2">
+                                            <i class="material-icons left">delete</i>Удалить
+                                        </a>
+                                    {% endif %}
                                 </div>
                                 <div class="col s4 right-align">
                                     <button data-pk="{{ mailing.pk }}"
                                             class="btn-small waves-effect waves-light {% if mailing.is_active %}green darken-2{% else %}grey lighten-1{% endif %} toggle-active-btn">
-                                        <i class="material-icons left">toggle_on</i>{% if mailing.is_active %}Активна{% else %}Неактивна{% endif %}
+                                        <i class="material-icons left">toggle_on</i>{% if mailing.is_active %}
+                                        Активна{% else %}Неактивна{% endif %}
                                     </button>
                                 </div>
                             </div>
@@ -51,15 +56,17 @@
                     </div>
                 </div>
             {% empty %}
-                <p class="center">Нет доступных рассылок.</p>
+                <h5 class="header center orange-text text-darken-2">Нет созданных рассылок</h5>
             {% endfor %}
         </div>
-        <div class="row center">
-            <a class="btn-floating btn-large waves-effect waves-light orange"
-               href="{% url 'mailing:mailing_create' %}">
-                <i class="material-icons">add</i>
-            </a>
-        </div>
+        {% if user|regular_user_only %}
+            <div class="row center">
+                <a class="btn-floating btn-large waves-effect waves-light orange"
+                   href="{% url 'mailing:mailing_create' %}">
+                    <i class="material-icons">add</i>
+                </a>
+            </div>
+        {% endif %}
         {% include 'mailing/includes/inc_pagination.html' %}
     </div>
 
@@ -76,22 +83,22 @@
                             'Content-Type': 'application/json',
                             'X-CSRFToken': '{{ csrf_token }}'
                         },
-                        body: JSON.stringify({ 'is_active': !isActive })
+                        body: JSON.stringify({'is_active': !isActive})
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            if (isActive) {
-                                this.classList.remove('green', 'darken-2');
-                                this.classList.add('grey', 'lighten-1');
-                                this.innerHTML = '<i class="material-icons left">toggle_on</i>Неактивна';
-                            } else {
-                                this.classList.remove('grey', 'lighten-1');
-                                this.classList.add('green', 'darken-2');
-                                this.innerHTML = '<i class="material-icons left">toggle_on</i>Активна';
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                if (isActive) {
+                                    this.classList.remove('green', 'darken-2');
+                                    this.classList.add('grey', 'lighten-1');
+                                    this.innerHTML = '<i class="material-icons left">toggle_on</i>Неактивна';
+                                } else {
+                                    this.classList.remove('grey', 'lighten-1');
+                                    this.classList.add('green', 'darken-2');
+                                    this.innerHTML = '<i class="material-icons left">toggle_on</i>Активна';
+                                }
                             }
-                        }
-                    });
+                        });
                 });
             });
         });
