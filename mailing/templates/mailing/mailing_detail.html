@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load perm_tag %}
 {% block content %}
     <div class="container">
         <h4 class="header center orange-text text-darken-2">Информация о рассылке</h4>
@@ -34,6 +35,7 @@
             <div class="card-action">
                 <div class="row">
                     <div class="col s8">
+                        {% if user|regular_user_only %}
                         <a href="{% url 'mailing:mailing_edit' object.pk %}"
                            class="waves-effect waves-light btn-small orange darken-2">
                             <i class="material-icons left">edit</i> Редактировать
@@ -42,6 +44,7 @@
                            class="waves-effect waves-light btn-small red darken-2">
                             <i class="material-icons left">delete</i> Удалить
                         </a>
+                        {% endif %}
                         <a href="{% url 'mailing:mailing_list' %}"
                            class="waves-effect waves-light btn-small blue darken-2">
                             <i class="material-icons left">list</i> К списку рассылок

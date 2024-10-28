@@ -5,8 +5,8 @@
             <br><br>
             <h1 class="header center orange-text">{{ title }}</h1>
             <div class="row center">
-                <h5 class="header col s12 light">Современный инструмент для управления рассылками, основанный на Django и
-                    Material Design</h5>
+                <h5 class="header col s12 light">Современный инструмент для управления рассылками, основанный на
+                    Django и Material Design</h5>
             </div>
             <br><br>
         </div>
@@ -14,33 +14,53 @@
     <div class="container">
         <div class="row">
             <div class="col s12 m4">
-                <div class="icon-block">
-                    <h2 class="center light-blue-text"><i class="material-icons">schedule</i></h2>
-                    <h5 class="center">Автоматизация процессов</h5>
-                    <p class="light">С помощью нашего планировщика вы сможете автоматизировать процесс отправки
-                        рассылок, настроив их на отправку в удобное для вас время, что позволит сэкономить время и
-                        усилия.</p>
+                <div class="card-panel teal lighten-2 white-text center hoverable">
+                    <i class="material-icons large">email</i>
+                    <h5>Всего рассылок</h5>
+                    <h3>{{ total_mailings }}</h3>
                 </div>
             </div>
-
             <div class="col s12 m4">
-                <div class="icon-block">
-                    <h2 class="center light-blue-text"><i class="material-icons">person_add</i></h2>
-                    <h5 class="center">Управление клиентами</h5>
-                    <p class="light">Легко добавляйте и управляйте списком ваших клиентов, включая возможность
-                        сегментации для более точного таргетинга ваших рассылок.</p>
+                <div class="card-panel green lighten-2 white-text center hoverable">
+                    <i class="material-icons large">check_circle</i>
+                    <h5>Активные рассылки</h5>
+                    <h3>{{ active_mailings }}</h3>
                 </div>
             </div>
-
             <div class="col s12 m4">
-                <div class="icon-block">
-                    <h2 class="center light-blue-text"><i class="material-icons">analytics</i></h2>
-                    <h5 class="center">Анализ результатов</h5>
-                    <p class="light">Получайте отчеты о статусах рассылок, анализируйте их эффективность и адаптируйте
-                        свою стратегию в зависимости от полученных данных.</p>
+                <div class="card-panel orange lighten-2 white-text center hoverable">
+                    <i class="material-icons large">people</i>
+                    <h5>Уникальные клиенты</h5>
+                    <h3>{{ unique_clients }}</h3>
                 </div>
             </div>
         </div>
+
+        <div class="section">
+            <h4 class="header center blue-text text-darken-2">Статьи из блога</h4>
+            <div class="row">
+                {% for article in random_articles %}
+                    <div class="col s12 m4">
+                        <div class="card hoverable">
+                            <div class="card-image">
+                                <img src="{{ article.preview.url }}" alt="{{ article.title }}"
+                                     style="height: 200px; object-fit: cover;">
+                                <span class="card-title">{{ article.title }}</span>
+                            </div>
+                            <div class="card-content">
+                                <p>{{ article.summary|truncatewords:20 }}</p>
+                            </div>
+                            <div class="card-action">
+                                <a href="{% url 'blog:article_detail' article.pk %}"
+                                   class="blue-text text-darken-2">Читать далее</a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <h5 class="center orange-text">Статьи пока не добавлены</h5>
+                {% endfor %}
+            </div>
+        </div>
     </div>
-    <br><br>
 {% endblock %}
+

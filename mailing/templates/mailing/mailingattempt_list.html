@@ -6,7 +6,7 @@
         </h4>
         <br>
         <div class="row">
-            {% for attempt in messageattempt_list %}
+            {% for attempt in mailingattempt_list %}
                 <div class="col s8 offset-s2">
                     <div class="card z-depth-3 hoverable">
                         <div class="card-content grey lighten-5">
@@ -26,7 +26,7 @@
                     </div>
                 </div>
             {% empty %}
-                <p class="center">Нет данных о попытках рассылок.</p>
+                <h5 class="header center orange-text text-darken-2">Нет выполненных рассылок</h5>
             {% endfor %}
         </div>
         {% include 'mailing/includes/inc_pagination.html' %}
