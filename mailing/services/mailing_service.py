@@ -22,7 +22,9 @@ def can_send_mailing(mailing: Mailing) -> bool:
     last_attempt = (
         MailingAttempt.objects.filter(
             mailing=mailing, status=MailingAttempt.Status.SUCCESS
-        ).order_by("-attempt_time").first()
+        )
+        .order_by("-attempt_time")
+        .first()
     )
 
     if not last_attempt:
