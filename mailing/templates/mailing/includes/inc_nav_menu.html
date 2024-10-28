@@ -16,6 +16,9 @@
                     </form>
                 </li>
             </ul>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="{% url 'users:profile' user.id %}">Мой профиль</a></li>
+            </ul>
             {% if user|manager_superuser_only %}
                 <ul class="right hide-on-med-and-down">
                     <li><a href="{% url 'users:users_list' %}">Пользователи</a></li>
