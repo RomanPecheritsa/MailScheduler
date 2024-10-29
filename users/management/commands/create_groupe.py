@@ -15,7 +15,6 @@ class Command(BaseCommand):
                 'mailing.change_mailing',
                 'mailing.delete_mailing',
                 'mailing.view_mailing',
-                "mailing.disable_mailing",
 
                 'mailing.view_mailingattempt',
 
@@ -27,6 +26,7 @@ class Command(BaseCommand):
             'manager': [
                 'mailing.view_mailingattempt',
                 'mailing.view_mailing',
+                "mailing.disable_mailing",
 
                 'users.block_users',
                 'users.view_user'
